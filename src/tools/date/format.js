@@ -1,4 +1,4 @@
-export default function (date, fmt = 'YYYY-MM-DD HH:mm:ss') {
+module.exports = function (date, fmt = 'YYYY-MM-DD HH:mm:ss') {
   if (!date) {
     return ''
   }

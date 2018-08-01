@@ -16,7 +16,6 @@ export default function () {
       default: true
     },
     disabled: Boolean,
-    arrowDirection: String, // down or up
-    alignItems: String
+    arrowDirection: String // down or up
   }
 }

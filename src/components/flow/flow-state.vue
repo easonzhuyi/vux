@@ -1,9 +1,7 @@
 <template>
   <div class="weui-wepay-flow__li" :class="{'weui-wepay-flow__li_done': isDone}">
     <div class="weui-wepay-flow__state">{{ state }}</div>
-    <p :class="`weui-wepay-flow__title-${titlePosition}`">
-      <slot name="title">{{ title }}</slot>
-    </p>
+    <p :class="`weui-wepay-flow__title-${titlePosition}`">{{ title }}</p>
   </div>
 </template>
 

@@ -1,4 +1,3 @@
-import objectAssign from 'object-assign'
 import ToastComponent from '../../components/toast'
 import { mergeOptions } from '../../libs/plugin_helper'
 
@@ -6,7 +5,7 @@ let $vm
 let watcher
 
 const plugin = {
-  install (vue, pluginOptions = {}) {
+  install (vue, options = {}) {
     const Toast = vue.extend(ToastComponent)
 
     if (!$vm) {
@@ -28,9 +27,9 @@ const plugin = {
         // destroy watcher
         watcher && watcher()
         if (typeof options === 'string') {
-          mergeOptions($vm, objectAssign({}, pluginOptions, {text: options}))
+          $vm.text = options
         } else if (typeof options === 'object') {
-          mergeOptions($vm, objectAssign({}, pluginOptions, options))
+          mergeOptions($vm, options)
         }
         if (typeof options === 'object' && options.onShow || options.onHide) {
           watcher = $vm.$watch('show', (val) => {

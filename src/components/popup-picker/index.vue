@@ -9,10 +9,10 @@
       </div>
       <div class="vux-cell-primary vux-popup-picker-select-box">
         <div class="vux-popup-picker-select" :style="{textAlign: valueTextAlign}">
-          <span class="vux-popup-picker-value vux-cell-value" v-if="!displayFormat && !showName && value.length">{{value | array2string}}</span>
-          <span class="vux-popup-picker-value vux-cell-value" v-if="!displayFormat && showName && value.length">{{value | value2name(data)}}</span>
-          <span class="vux-popup-picker-value vux-cell-value" v-if="displayFormat && value.length">{{ displayFormat(value, value2name(value, data)) }}</span>
-          <span v-if="!value.length && placeholder" v-text="placeholder" class="vux-popup-picker-placeholder vux-cell-placeholder"></span>
+          <span class="vux-popup-picker-value" v-if="!displayFormat && !showName && value.length">{{value | array2string}}</span>
+          <span class="vux-popup-picker-value" v-if="!displayFormat && showName && value.length">{{value | value2name(data)}}</span>
+          <span class="vux-popup-picker-value" v-if="displayFormat && value.length">{{ displayFormat(value, value2name(value, data)) }}</span>
+          <span v-if="!value.length && placeholder" v-text="placeholder" class="vux-popup-picker-placeholder"></span>
         </div>
       </div>
       <div class="weui-cell__ft">
@@ -28,12 +28,12 @@
       @on-show="onPopupShow"
       :popup-style="popupStyle">
         <div class="vux-popup-picker-container">
-          <popup-header
-          :left-text="cancelText || $t('cancel_text')"
-          :right-text="confirmText || $t('confirm_text')"
-          @on-click-left="onHide(false)"
-          @on-click-right="onHide(true)"
-          :title="popupTitle"></popup-header>
+          <div class="vux-popup-picker-header" @touchmove.prevent>
+            <flexbox>
+              <flexbox-item class="vux-popup-picker-header-menu vux-popup-picker-cancel" @click.native="onHide(false)">{{ cancelText || $t('cancel_text') }}</flexbox-item>
+              <flexbox-item class="vux-popup-picker-header-menu vux-popup-picker-header-menu-right" @click.native="onHide(true)">{{ confirmText || $t('confirm_text') }}</flexbox-item>
+            </flexbox>
+          </div>
           <picker
           :data="data"
           v-model="tempValue"
@@ -62,7 +62,6 @@ confirm_text:
 import Picker from '../picker'
 import Cell from '../cell'
 import Popup from '../popup'
-import PopupHeader from '../popup-header'
 import InlineDesc from '../inline-desc'
 import { Flexbox, FlexboxItem } from '../flexbox'
 import array2string from '../../filters/array2String'
@@ -83,13 +82,13 @@ export default {
     if (typeof this.show !== 'undefined') {
       this.showValue = this.show
     }
+    console.log(this.value)
   },
   mixins: [uuidMixin],
   components: {
     Picker,
     Cell,
     Popup,
-    PopupHeader,
     Flexbox,
     FlexboxItem,
     InlineDesc
@@ -140,8 +139,7 @@ export default {
       default: true
     },
     columnWidth: Array,
-    popupStyle: Object,
-    popupTitle: String
+    popupStyle: Object
   },
   computed: {
     labelStyles () {
@@ -211,18 +209,17 @@ export default {
     value (val) {
       if (JSON.stringify(val) !== JSON.stringify(this.tempValue)) {
         this.tempValue = getObject(val)
-        this.currentValue = getObject(val)
       }
-    },
+    },           
+
     currentValue (val) {
-      this.$emit('input', getObject(val))
-      this.$emit('on-change', getObject(val))
+      if(JSON.stringify(val) !== JSON.stringify(this.value)){
+        this.$emit('input', getObject(val))
+        this.$emit('on-change', getObject(val))
+      }
     },
     show (val) {
       this.showValue = val
-    },
-    showValue (val) {
-      this.$emit('update:show', val)
     }
   },
   data () {
@@ -248,9 +245,10 @@ export default {
 .vux-cell-box {
   position: relative;
 }
-.vux-cell-box:not(:first-child):before {
+.vux-cell-box:before {
   content: " ";
   position: absolute;
+  left: 0;
   top: 0;
   width: 100%;
   height: 1px;

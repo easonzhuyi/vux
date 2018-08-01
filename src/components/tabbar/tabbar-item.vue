@@ -20,7 +20,7 @@ export default {
   components: {
     Badge
   },
-  mounted () {
+  beforeMount () {
     if (!this.$slots.icon) {
       this.simple = true
     }

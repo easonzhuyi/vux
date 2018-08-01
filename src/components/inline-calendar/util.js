@@ -48,18 +48,32 @@ function getTime (str) {
   return typeof str === 'string' ? new Date(str.replace(/-/g, '/')).getTime() : str.getTime()
 }
 
-export function isBetween (value, disablePast, disableFuture, rangeBegin, rangeEnd) {
-  const { start, end } = getRange(disablePast, disableFuture, rangeBegin, rangeEnd)
+function isBetween (value, start, end) {
   value = getTime(value)
   let isGte = start ? value >= getTime(start) : true
   let isLte = end ? value <= getTime(end) : true
   return isGte && isLte
 }
 
-function getRange (disablePast = false, disableFuture = false, rangeBegin, rangeEnd) {
+function _isBetween (year, month, day, start, end) {
+  let _format = format(new Date(year + '/' + (month + 1) + '/' + day), 'YYYY/MM/DD')
+  return isBetween(_format, start, end)
+}
+
+export function getDays ({year, month, value, isRange = false, rangeBegin, rangeEnd, returnSixRows = true, disablePast = false, disableFuture = false}) {
+  let today = format(new Date(), 'YYYY-MM-DD')
   let startOfToday = new Date()
   startOfToday.setHours(0, 0, 0, 0)
 
+  let _splitValue = splitValue(value || today)
+
+  // if year or month is not specified, get them from value
+  if (typeof year !== 'number' || typeof month !== 'number' || month < 0) {
+    year = _splitValue.year
+    month = _splitValue.month
+  }
+
+  // if disablePast === true
   if (disablePast) {
     if (!rangeBegin) {
       rangeBegin = startOfToday
@@ -68,28 +82,13 @@ function getRange (disablePast = false, disableFuture = false, rangeBegin, range
     }
   }
 
+  // if disableFuture === true
   if (disableFuture) {
     if (!rangeEnd) {
       rangeEnd = startOfToday
     } else {
       rangeEnd = Math.min(startOfToday.getTime(), getTime(rangeEnd))
     }
-  }
-  return {
-    start: rangeBegin,
-    end: rangeEnd
-  }
-}
-
-export function getDays ({year, month, value, rangeBegin, rangeEnd, returnSixRows = true}) {
-  let today = format(new Date(), 'YYYY-MM-DD')
-
-  let _splitValue = splitValue(value || today)
-
-  // if year or month is not specified, get them from value
-  if (typeof year !== 'number' || typeof month !== 'number' || month < 0) {
-    year = _splitValue.year
-    month = _splitValue.month
   }
 
   var firstDayOfMonth = new Date(year, month, 1).getDay()
@@ -114,7 +113,9 @@ export function getDays ({year, month, value, rangeBegin, rangeEnd, returnSixRow
           year: rs.year,
           month: rs.month,
           month_str: rs.month + 1,
+          isBetween: _isBetween(rs.year, rs.month, k, rangeBegin, rangeEnd),
           day: k,
+          disabled: true,
           isLastMonth: true
         })
         k++
@@ -128,6 +129,8 @@ export function getDays ({year, month, value, rangeBegin, rangeEnd, returnSixRow
       month_str: month + 1,
       day: i,
       isCurrent: value && format(new Date(value), 'YYYY/MM/DD') === _format,
+      disabled: !isBetween(_format, rangeBegin, rangeEnd),
+      isBetween: _isBetween(year, month, i, rangeBegin, rangeEnd),
       isToday: format(new Date(), 'YYYY/MM/DD') === _format
     }
     temp[line].push(options)
@@ -143,6 +146,8 @@ export function getDays ({year, month, value, rangeBegin, rangeEnd, returnSixRow
           month: rs.month,
           month_str: rs.month + 1,
           day: k,
+          disabled: true,
+          isBetween: _isBetween(rs.year, rs.month, k, rangeBegin, rangeEnd),
           isNextMonth: true
         })
         k++
@@ -161,6 +166,8 @@ export function getDays ({year, month, value, rangeBegin, rangeEnd, returnSixRow
         month: rs.month,
         month_str: rs.month + 1,
         day: day,
+        disabled: true,
+        isBetween: _isBetween(rs.year, rs.month, day, rangeBegin, rangeEnd),
         isNextMonth: true
       })
     }
@@ -179,6 +186,8 @@ export function getDays ({year, month, value, rangeBegin, rangeEnd, returnSixRow
         month: rs.month,
         month_str: rs.month + 1,
         day: day,
+        disabled: true,
+        isBetween: _isBetween(rs.year, rs.month, day, rangeBegin, rangeEnd),
         isNextMonth: true
       })
       day = ++start
@@ -187,6 +196,8 @@ export function getDays ({year, month, value, rangeBegin, rangeEnd, returnSixRow
         month: rs.month,
         month_str: rs.month + 1,
         day: day,
+        disabled: true,
+        isBetween: _isBetween(rs.year, rs.month, day, rangeBegin, rangeEnd),
         isNextMonth: true
       })
     }
@@ -199,13 +210,10 @@ export function getDays ({year, month, value, rangeBegin, rangeEnd, returnSixRow
     days: temp.map(line => {
       /**
       * https://github.com/airyland/vux/issues/1361
-      * @todo day will be changed to weekDay after v3.0
+      * @todo day will be changed to week-day after v3.0
       */
-      line.map((item, index) => {
+      line.map(item => {
         item.date = item.day
-        item.weekDay = index
-        item.isWeekend = index === 0 || index === 6
-        item.formatedDate = format(new Date(`${item.year}/${item.month_str}/${item.date}`), 'YYYY-MM-DD')
         return item
       })
       return line

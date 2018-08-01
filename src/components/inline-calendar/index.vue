@@ -1,6 +1,5 @@
 <template>
   <div class="inline-calendar" :class="{'is-weekend-highlight': highlightWeekend}">
-    
     <div class="calendar-header" v-show="!hideHeader">
       <div class="calendar-year">
         <span @click="go(year - 1, month)">
@@ -26,7 +25,7 @@
     <table>
       <thead v-show="!hideWeekList">
         <tr>
-          <th v-for="(week, index) in _weeksList" class="week" :class="`is-week-list-${index}`">{{ week || $t('week_day_' + index /* en: week, zh-CN: week */) }}</th>
+          <th v-for="(week, index) in _weeksList" class="week" :class="`is-week-list-${index}`">{{week}}</th>
         </tr>
       </thead>
       <tbody>
@@ -36,13 +35,11 @@
           :data-date="formatDate(year, month, child)"
           :data-current="currentValue"
           :class="buildClass(k2, child)"
-          @click="select(k1, k2, child)">
+          @click="select(k1,k2,child)">
             <slot
             :year="year"
             :month="month"
-            :child="processDateItem(child)/* deprecated, use date instead */"
-            :date="processDateItem(child)"
-            class-name="vux-calendar-each-date"
+            :child="child"
             :row="k1"
             :col="k2"
             :raw-date="formatDate(year, month, child)"
@@ -51,14 +48,7 @@
             name="each-day">
               <span
               class="vux-calendar-each-date"
-              :style="getMarkStyle(child)"
-              v-show="showChild(year, month, child)">
-                {{ replaceText(child.day, formatDate(year, month, child)) }}
-                <span class="vux-calendar-top-tip" v-if="isShowTopTip(child)" :style="isShowTopTip(child, 'style')">
-                  <span>{{ isShowTopTip(child, 'text') }}</span>
-                </span>
-              </span>
-              <span class="vux-calendar-dot" v-if="isShowBottomDot(child)"></span>
+              v-show="showChild(year, month, child)">{{replaceText(child.day, formatDate(year, month, child))}}</span>
               <div v-html="renderFunction(k1, k2, child)" v-show="showChild(year, month, child)"></div>
             </slot>
           </td>
@@ -68,39 +58,13 @@
   </div>
 </template>
 
-<i18n>
-week_day_0:
-  en: Su
-  zh-CN: 日
-week_day_1:
-  en: Mo
-  zh-CN: 一
-week_day_2:
-  en: Tu
-  zh-CN: 二
-week_day_3:
-  en: We
-  zh-CN: 三
-week_day_4:
-  en: Th
-  zh-CN: 四
-week_day_5:
-  en: Fr
-  zh-CN: 五
-week_day_6:
-  en: Sa
-  zh-CN: 六
-</i18n>
-
 <script>
 import format from '../datetime/format'
-import { getDays, zero, isBetween } from './util'
+import { getDays, zero } from './util'
 import props from './props'
-import calendarMarksMixin from '../../mixins/calendar-marks'
 
 export default {
   name: 'inline-calendar',
-  mixins: [calendarMarksMixin],
   props: props(),
   data () {
     return {
@@ -110,14 +74,14 @@ export default {
       days: [],
       today: format(new Date(), 'YYYY-MM-DD'),
       months: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
-      currentValue: '',
-      viewChangeEventCount: -1
+      currentValue: ''
     }
   },
   created () {
     this.currentValue = this.value
     this.multi = Object.prototype.toString.call(this.currentValue) === '[object Array]'
-
+  },
+  mounted () {
     if (this.multi) {
       for (let i = 0; i < this.currentValue.length; i++) {
         this.$set(this.currentValue, i, this.convertDate(this.currentValue[i]))
@@ -130,25 +94,10 @@ export default {
   },
   computed: {
     _weeksList () {
-      if (this.weeksList && this.weeksList.length) {
-        return this.weeksList
-      }
       if (!this.weeksList || !this.weeksList.length) {
-        // tip for older vux-loader
-        if (typeof V_LOCALE === 'undefined') {
-          if (process.env.NODE_ENV === 'development') {
-            console.warn('[VUX warn] 抱歉，inline-calendar 组件需要升级 vux-loader 到最新版本才能正常使用')
-          }
-          return ['日', '一', '二', '三', '四', '五', '六']
-        } else {
-          if (V_LOCALE === 'en') { // eslint-disable-line
-            return ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
-          } else if (V_LOCALE === 'zh-CN') { // eslint-disable-line
-            return ['日', '一', '二', '三', '四', '五', '六']
-          } else if (V_LOCALE === 'MULTI') { // eslint-disable-line
-            return [0, 0, 0, 0, 0, 0, 0]
-          }
-        }
+        return ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+      } else {
+        return this.weeksList
       }
     },
     _replaceTextList () {
@@ -157,26 +106,21 @@ export default {
         rs[this.convertDate(i)] = this.replaceTextList[i]
       }
       return rs
-    },
-    currentYearMonth () {
-      return this.year + this.month
     }
   },
   watch: {
     value (val) {
       this.currentValue = this.multi ? val : this.convertDate(val)
     },
-    currentValue (val, oldVal) {
+    currentValue (val) {
+      const value = this.multi ? this.currentValue[this.currentValue.length - 1] : this.currentValue
+      if (this.renderOnValueChange) {
+        this.render(null, null, value)
+      } else {
+        this.render(this.year, this.month, value)
+      }
       this.$emit('input', this.currentValue)
       this.$emit('on-change', this.currentValue)
-
-      if (this.renderOnValueChange) {
-        // if on the same year+month, stay quiet
-        if (val && oldVal && val.slice(0, 7) === oldVal.slice(0, 7)) {
-          return
-        }
-        this.render(null, null, 'value change')
-      }
     },
     renderFunction () {
       this.render(this.year, this.month, this.currentValue)
@@ -187,100 +131,22 @@ export default {
       }
     },
     returnSixRows (val) {
-      this.render(this.year, this.month)
+      this.render(this.year, this.month, this.currentValue)
     },
     startDate (val) {
-      this.render(this.year, this.month)
+      this.render(this.year, this.month, this.currentValue)
     },
     endDate (val) {
-      this.render(this.year, this.month)
+      this.render(this.year, this.month, this.currentValue)
     },
     disablePast () {
-      this.render(this.year, this.month)
+      this.render(this.year, this.month, this.currentValue)
     },
     disableFuture () {
-      this.render(this.year, this.month)
-    },
-    currentYearMonth () {
-      const lastLine = this.days[this.days.length - 1]
-      const lastDate = lastLine[lastLine.length - 1]
-
-      let days = []
-      this.days.forEach(line => {
-        days = days.concat(line)
-      })
-      days = days.filter(date => {
-        return !date.isLastMonth && !date.isNextMonth
-      })
-      this.viewChangeEventCount++
-      this.$emit('on-view-change', {
-        year: this.year,
-        month: this.month + 1,
-        firstDate: this.days[0][0].formatedDate,
-        lastDate: lastDate.formatedDate,
-        firstCurrentMonthDate: days[0].formatedDate,
-        lastCurrentMonthDate: days[days.length - 1].formatedDate,
-        allDates: this.days
-      }, this.viewChangeEventCount)
+      this.render(this.year, this.month, this.currentValue)
     }
   },
   methods: {
-    processDateItem (item) {
-      const temp = JSON.parse(JSON.stringify(item))
-      temp.isDisabled = this.isDisabled(item)
-      temp.isBetween = this.isBetween(item.formatedDate)
-      return temp
-    },
-    isBetween (formatedDate) {
-      return isBetween(formatedDate, this.disablePast, this.disableFuture, this.startDate, this.endDate)
-    },
-    isDisabled (date) {
-      let disabled = !this.isBetween(date.formatedDate)
-      disabled = disabled || (date.isWeekend && this.disableWeekend)
-      disabled = disabled || date.isNextMonth || date.isLastMonth
-
-      if (!this.disableDateFunction) {
-        return disabled
-      } else {
-        const value = this.disableDateFunction(date)
-        if (typeof value === 'undefined') {
-          return disabled
-        } else {
-          return value
-        }
-      }
-    },
-    switchViewToToday () {
-      const today = new Date()
-      this.render(today.getFullYear(), today.getMonth())
-    },
-    switchViewToCurrentValue () {
-      if (!this.currentValue || (this.multi && !this.currentValue.length)) {
-        return
-      }
-
-      let value
-      let year
-      let month
-      if (typeof this.currentValue === 'string') {
-        value = this.currentValue
-      } else {
-        value = this.currentValue[0]
-      }
-      const splitList = value.split('-')
-      year = parseInt(splitList[0], 10)
-      month = parseInt(splitList[1], 10)
-      this.switchViewToMonth(year, month)
-    },
-    switchViewToMonth (year, month) {
-      if (!year || !month) {
-        return this.switchViewToToday()
-      }
-      this.render(year, month - 1)
-    },
-    getDates () {
-      return this.days
-    },
     replaceText (day, formatDay) {
       let text = this._replaceTextList[formatDay]
       if (!text && typeof text === 'undefined') {
@@ -302,14 +168,14 @@ export default {
         }
       }
       const className = {
-        'current': isCurrent,
-        'is-disabled': this.isDisabled(child),
-        'is-today': child.isToday,
-        [`is-week-${index}`]: true
+        current: child.current || isCurrent,
+        'is-disabled': child.disabled,
+        'is-today': child.isToday
       }
+      className[`is-week-${index}`] = true
       return className
     },
-    render (year, month, force = false) {
+    render (year, month) {
       let data = null
       const value = this.multi ? this.currentValue[this.currentValue.length - 1] : this.currentValue
       data = getDays({
@@ -322,13 +188,9 @@ export default {
         disablePast: this.disablePast,
         disableFuture: this.disableFuture
       })
-
-      if (this.year === data.year && this.month === data.month && !force) {
-        return
-      }
+      this.days = data.days
       this.year = data.year
       this.month = data.month
-      this.days = data.days
     },
     formatDate: (year, month, child) => {
       return [year, zero(child.month + 1), zero(child.day)].join('-')
@@ -340,7 +202,7 @@ export default {
       } else {
         this.month = this.month - 1
       }
-      this.render(this.year, this.month, true)
+      this.render(this.year, this.month)
     },
     next () {
       if (this.month === 11) {
@@ -349,10 +211,10 @@ export default {
       } else {
         this.month = this.month + 1
       }
-      this.render(this.year, this.month, true)
+      this.render(this.year, this.month)
     },
     go (year, month) {
-      this.render(year, month, true)
+      this.render(year, month)
     },
     select (k1, k2, data) {
       if (data.isLastMonth && !this.showLastMonth) {
@@ -361,22 +223,8 @@ export default {
       if (data.isNextMonth && !this.showNextMonth) {
         return
       }
-      if (!this.isBetween(data.formatedDate)) {
+      if (!data.isBetween) {
         return
-      }
-
-      if (this.isDisabled(data)) {
-        // not in range
-        if (!this.isBetween(data.formatedDate)) {
-          return
-        } else { // in range but disabled by disableDateFunction
-          if (this.disableDateFunction && this.disableDateFunction(data)) {
-            return
-          }
-          if (data.isWeekend && this.disableWeekend) {
-            return
-          }
-        }
       }
       let _currentValue = null
       if (!data.isLastMonth && !data.isNextMonth) {
@@ -393,10 +241,12 @@ export default {
           this.currentValue.push(_currentValue)
         }
       } else {
-        this.currentValue = _currentValue
-        this.$emit('on-select-single-date', this.currentValue)
+        this.currentValue = this.currentValue === _currentValue ? '' : _currentValue
       }
 
+      this.currentValueChange()
+    },
+    currentValueChange () {
       if (this.multi) {
         for (let i = 0; i < this.currentValue.length; i++) {
           this.$set(this.currentValue, i, this.convertDate(this.currentValue[i]))
@@ -404,10 +254,14 @@ export default {
       } else {
         this.currentValue = this.convertDate(this.currentValue)
       }
-
+      const value = this.multi ? this.currentValue[this.currentValue.length - 1] : this.currentValue
       if (this.renderOnValueChange) {
-        this.render(null, null)
+        this.render(null, null, value)
+      } else {
+        this.render(this.year, this.month, value)
       }
+      this.$emit('input', this.currentValue)
+      this.$emit('on-change', this.currentValue)
     },
     showChild (year, month, child) {
       if (this.replaceText(child.day, this.formatDate(year, month, child))) {
@@ -517,7 +371,7 @@ export default {
 }
 .inline-calendar {
   width: 100%;
-  background-color: @calendar-bg-color;
+  background: #fff;
   border-radius: 2px;
   transition: all .5s ease;
 }
@@ -565,44 +419,15 @@ export default {
   color: @calendar-disabled-font-color;
 }
 .inline-calendar td > span.vux-calendar-each-date {
-  position: relative;
   display: inline-block;
-  width: @calendar-each-date-item-size;
-  height: @calendar-each-date-item-size;
-  line-height: @calendar-each-date-item-line-height;
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
   border-radius: 50%;
   text-align: center;
-  border: 1px solid transparent;
-  box-sizing: border-box;
 }
 .inline-calendar td.current > span.vux-calendar-each-date {
   background-color: @calendar-selected-bg-color;
   color: #fff!important;
-}
-.inline-calendar th {
-  color: @calendar-header-day-item-color;
-  font-weight: normal;
-}
-
-/** same as week-calendar style**/
-.vux-calendar-top-tip {
-  position: absolute;
-  left: -10px;
-  top: 0;
-  font-size: 20px;
-  transform: scale(0.5);
-  transform-origin: top left;
-}
-.vux-calendar-dot {
-  display: block;
-  text-align: center;
-  width: 5px;
-  height: 5px;
-  position: absolute;
-  left: 50%;
-  bottom: 0px;
-  margin-left: -2.5px;
-  background-color: #f74c31;
-  border-radius: 50%;
 }
 </style>

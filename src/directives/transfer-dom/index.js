@@ -1,6 +1,6 @@
 // Thanks to: https://github.com/calebroseland/vue-dom-portal
 
-const objectAssign = require('object-assign')
+import objectAssign from 'object-assign'
 /**
  * Get target DOM Node
  * @param {(Node|string|Boolean)} [node=document.body] DOM Node, CSS selector, or Boolean
@@ -90,7 +90,7 @@ const directive = {
   },
   unbind: function unbind (el, binding) {
     el.className = el.className.replace('v-transfer-dom', '')
-    if (el.__transferDomData && el.__transferDomData.hasMovedOut === true) {
+    if (el.__transferDomData.hasMovedOut === true) {
       el.__transferDomData.parentNode && el.__transferDomData.parentNode.appendChild(el)
     }
     el.__transferDomData = null

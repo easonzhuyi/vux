@@ -8,17 +8,5 @@ export default {
     } else {
       Vue.$vux.bus = bus
     }
-
-    Vue.mixin({
-      created: function () {
-        if (this.$vux) {
-          this.$vux.bus = bus
-        } else {
-          this.$vux = {
-            bus
-          }
-        }
-      }
-    })
   }
 }

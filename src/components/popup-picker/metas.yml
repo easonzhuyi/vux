@@ -42,10 +42,6 @@ props:
   inline-desc:
     en: description text below label
     zh-CN: Cell的描述文字
-  show:
-    type: Boolean
-    en: popup show (supports the .sync modifier next)
-    zh-CN: 显示 (支持.sync修饰 next)
   value-text-align:
     type: String
     version: v2.1.0-rc.3
@@ -62,11 +58,6 @@ props:
     type: Object
     en: popup style
     zh-CN: 弹窗样式，可以用于强制指定 z-index
-  popup-title:
-    version: v2.7.0
-    type: String
-    en: popup title
-    zh-CN: 弹窗标题
 slots:
   title:
     version: v2.3.7
@@ -90,31 +81,6 @@ events:
     en: emits when picker value is changed
     zh-CN: picker 值变化时触发，即滑动 picker 时触发
 changes:
-  v2.7.7:
-    en:
-      - '[fix] remove the first top line #2371'
-    zh-CN:
-      - '[fix] 去除第一个子元素的上边线 #2371'
-  v2.7.0:
-    en:
-      - '[feature] add prop:popup-title(use component:popup-header) #1866'
-    zh-CN:
-      - '[feature] 增加属性 popup-title(使用 popup-header 组件) #1866'
-  v2.5.10:
-    en:
-      - '[feature] support @cell-value-color #1874'
-    zh-CN:
-      - '[feature] 值文字颜色受控于 @cell-value-color #1874'
-  v2.5.8:
-    en:
-      - '[fix] prevent background scrolling when popup is show #1830'
-    zh-CN:
-      - '[fix] popup显示时阻止背景滚动 #1830'
-  v2.5.7:
-    en:
-      - '[fix] Fix render issue after changing value #1793'
-    zh-CN:
-      - '[fix] 修复修改值后第二次打开默认选中项渲染不正确的问题 #1793'
   v2.5.6:
     en:
       - '[feature] Support event:on-shadow-change #1778'

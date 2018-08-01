@@ -43,13 +43,6 @@ const plugin = {
         })
         $vm.showValue = true
       },
-      setInputValue (val) {
-        vue.nextTick(() => {
-          setTimeout(() => {
-            $vm.setInputValue(val)
-          }, 10)
-        })
-      },
       prompt (placeholder, options) {
         this.show(Object.assign({}, options, {
           placeholder,

@@ -4,7 +4,7 @@
 
 <script>
 import Blazy from 'vux-blazy'
-import { isSupported, detectWebp } from '../../libs/webp-support'
+import webpSupport from 'webp-support'
 import uuidMixin from '../../libs/mixin_uuid'
 
 export default {
@@ -16,11 +16,7 @@ export default {
   methods: {
     init () {
       const _this = this
-
       this.blazy && this.blazy.destroy()
-      this.$el.src = this.defaultSrc
-      this.$el.className = this.$el.className.replace('b-loaded', '')
-
       this.blazy = new Blazy({
         scroller: this.scroller,
         container: this.container,
@@ -44,11 +40,10 @@ export default {
         this.init()
       }, this.delay)
     })
-    detectWebp()
   },
   computed: {
     currentSrc () {
-      if (isSupported() && this.webpSrc) {
+      if (webpSupport() && this.webpSrc) {
         return this.webpSrc
       }
       return this.src
@@ -65,18 +60,13 @@ export default {
     successClass: String,
     offset: {
       type: Number,
-      default: 100
+      defaut: 100
     },
     scroller: Object,
     container: String,
     delay: {
       type: Number,
       default: 0
-    }
-  },
-  watch: {
-    src (val) {
-      this.init()
     }
   },
   beforeDestroy () {
@@ -88,11 +78,9 @@ export default {
 </script>
 
 <style>
-.vux-x-img, .b-lazy {
+.b-lazy {
   transition: opacity 500ms ease-in-out;
   max-width: 100%;
-}
-.b-lazy {
   opacity: 0;
 }
 

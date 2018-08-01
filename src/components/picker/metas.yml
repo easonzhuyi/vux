@@ -12,7 +12,7 @@ extra: |
   <p class="warning">
     请确保列表项的`value`值是字符串，使用数字会出错。
     <br />
-    如果你的业务接口返回数字值为数字，需要你先处理成字符串；同样，获取到值时为字符串，你需要自己转换成数字。
+    如果你的业务接口返回数字值为数字，需要你先处理成数字；同样，获取到值时为字符串，你需要自己转换成数字。
   </p>
 
   非联动情况下，列表数据格式示例：
@@ -132,31 +132,6 @@ methods:
     en: get labels of current value
     zh-CN: 根据 value 获取字面值
 changes:
-  v2.7.9:
-    en:
-      - '[fix] fix typo item_class => itemClass #2457'
-    zh-CN:
-      - '[fix] 修正 itemClass 拼写错误 #2457'
-  v2.7.8:
-    en:
-      - '[fix] Fix chain mode get value is wrong when the children is empty data.'
-    zh-CN:
-      - '[fix] 修复多级联动模式下，子代没有数据时，取值不正确。'
-  v2.7.3:
-    en:
-      - '[enhance] add development tip for chained-mode picker without specifying prop:columns'
-    zh-CN:
-      - '[enhance] 渲染出错时提示是否联动数据忘了指定列数'
-  v2.7.0:
-    en:
-      - '[change] picker move distance do not respect html[data-dpr] by default #2082 #1979'
-    zh-CN:
-      - '[change] picker 移动距离不再遵从 html[data-dpr]，需使用 ConfigPlugin 配置 #2082 #1979'
-  v2.6.2:
-    en:
-      - '[enhance] scroll distance respects html[data-dpr] #1979'
-    zh-CN:
-      - '[enhance] 滚动距离支持从 html[data-dpr] 换算 #1979'
   v2.3.1:
     en:
       - '[feature] Add getNameValues Method #1418'

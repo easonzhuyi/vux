@@ -7,14 +7,13 @@
       <slot name="title">{{ title }}</slot>
     </div>
     <div class="vux-popup-header-right" @click="$emit('on-click-right')">
-      <slot name="right-text">{{ rightText }}</slot>
+      <slot name="left-text">{{ rightText }}</slot>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'popup-header',
   props: {
     leftText: String,
     rightText: String,
@@ -43,6 +42,8 @@ export default {
   text-align: center;
   color: @popup-header-title-text-color;
 }
+.vux-popup-header-left, .vux-popup-header-right {
+}
 .vux-popup-header-left {
   padding-left: @popup-header-left-text-padding;
   color: @popup-header-left-text-color;
@@ -50,8 +51,5 @@ export default {
 .vux-popup-header-right {
   padding-right: @popup-header-right-text-padding;
   color: @popup-header-right-text-color;
-}
-.vux-popup-header.vux-1px-b:after {
-  border-color: #D9D9D9;
 }
 </style>

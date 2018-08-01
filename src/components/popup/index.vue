@@ -8,7 +8,6 @@
 
 <script>
 import Popup from './popup'
-import dom from '../../libs/dom'
 
 export default {
   name: 'popup',
@@ -42,12 +41,6 @@ export default {
       default: true
     }
   },
-  created () {
-    // get global layout config
-    if (this.$vux && this.$vux.config && this.$vux.config.$layout === 'VIEW_BOX') {
-      this.layout = 'VIEW_BOX'
-    }
-  },
   mounted () {
     this.$overflowScrollingList = document.querySelectorAll('.vux-fix-safari-overflow-scrolling')
     this.$nextTick(() => {
@@ -79,7 +72,6 @@ export default {
     if (this.hideOnDeactivated) {
       this.show = false
     }
-    this.removeModalClassName()
   },
   methods: {
     /**
@@ -92,14 +84,10 @@ export default {
       for (let i = 0; i < this.$overflowScrollingList.length; i++) {
         this.$overflowScrollingList[i].style.webkitOverflowScrolling = type
       }
-    },
-    removeModalClassName () {
-      this.layout === 'VIEW_BOX' && dom.removeClass(document.body, 'vux-modal-open')
     }
   },
   data () {
     return {
-      layout: '',
       initialShow: true,
       hasFirstShow: false,
       show: this.value
@@ -137,7 +125,6 @@ export default {
         this.popup && this.popup.show()
         this.$emit('on-show')
         this.fixSafariOverflowScrolling('auto')
-        this.layout === 'VIEW_BOX' && dom.addClass(document.body, 'vux-modal-open')
         if (!this.hasFirstShow) {
           this.$emit('on-first-show')
           this.hasFirstShow = true
@@ -150,22 +137,19 @@ export default {
           if (!document.querySelector('.vux-popup-dialog.vux-popup-show')) {
             this.fixSafariOverflowScrolling('touch')
           }
-          this.removeModalClassName()
         }, 200)
       }
     }
   },
   beforeDestroy () {
-    this.popup && this.popup.destroy()
+    this.popup.destroy()
     this.fixSafariOverflowScrolling('touch')
-    this.removeModalClassName()
   }
 }
 </script>
 
 <style lang="less">
 @import '../../styles/variable.less';
-@import '../../styles/vux-modal.css';
 
 .vux-popup-dialog {
   position: fixed;

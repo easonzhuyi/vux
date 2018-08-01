@@ -8,7 +8,6 @@ import Picker from '../datetime/datetimepicker'
 import objectAssign from 'object-assign'
 
 export default {
-  name: 'datetime-view',
   extends: Datetime,
   methods: {
     render () {

@@ -98,8 +98,7 @@ utf8to16 = function(e) {
   }
   return t;
 };
-
-export default {
+module.exports = {
   "encode": function(data) {
     return base64encode(utf16to8(data));
   },

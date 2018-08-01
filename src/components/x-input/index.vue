@@ -1,17 +1,16 @@
 <template>
-	<div class="vux-x-input weui-cell" :class="{'weui-cell_warn': showWarn, 'disabled': disabled}">
+	<div class="vux-x-input weui-cell" :class="{'weui-cell_warn': showWarn}">
     <div class="weui-cell__hd">
       <div :style="labelStyles" v-if="hasRestrictedLabel">
         <slot name="restricted-label"></slot>
       </div>
       <slot name="label">
-        <label class="weui-label" :class="labelClass" :style="{width: labelWidth || $parent.labelWidth || labelWidthComputed, textAlign: $parent.labelAlign, marginRight: $parent.labelMarginRight}" v-if="title" v-html="title" :for="`vux-x-input-${uuid}`"></label>
+        <label class="weui-label" :class="labelClass" :style="{width: labelWidth || $parent.labelWidth || labelWidthComputed, textAlign: $parent.labelAlign, marginRight: $parent.labelMarginRight}" v-if="title" v-html="title"></label>
         <inline-desc v-if="inlineDesc">{{inlineDesc}}</inline-desc>
       </slot>
     </div>
     <div class="weui-cell__bd weui-cell__primary" :class="placeholderAlign ? `vux-x-input-placeholder-${placeholderAlign}` : ''">
       <input
-      :id="`vux-x-input-${uuid}`"
       v-if="!type || type === 'text'"
       class="weui-input"
       :maxlength="max"
@@ -32,7 +31,6 @@
       @keyup="onKeyUp"
       ref="input"/>
       <input
-      :id="`vux-x-input-${uuid}`"
       v-if="type === 'number'"
       class="weui-input"
       :maxlength="max"
@@ -53,7 +51,6 @@
       @keyup="onKeyUp"
       ref="input"/>
       <input
-      :id="`vux-x-input-${uuid}`"
       v-if="type === 'email'"
       class="weui-input"
       :maxlength="max"
@@ -74,7 +71,6 @@
       @keyup="onKeyUp"
       ref="input"/>
       <input
-      :id="`vux-x-input-${uuid}`"
       v-if="type === 'password'"
       class="weui-input"
       :maxlength="max"
@@ -95,7 +91,6 @@
       @keyup="onKeyUp"
       ref="input"/>
       <input
-      :id="`vux-x-input-${uuid}`"
       v-if="type === 'tel'"
       class="weui-input"
       :maxlength="max"
@@ -117,11 +112,10 @@
       ref="input"/>
     </div>
     <div class="weui-cell__ft">
-      <icon type="clear" v-show="!equalWith && showClear && currentValue !== '' && !readonly && !disabled" @click.native="clear"></icon>
+      <icon type="clear" v-show="!equalWith && showClear && currentValue && !readonly && !disabled" @click.native="clear"></icon>
 
-      <icon @click.native="onClickErrorIcon" class="vux-input-icon" type="warn" :title="!valid ? firstError : ''" v-show="showWarn"></icon>
-      <icon @click.native="onClickErrorIcon" class="vux-input-icon" type="warn" v-if="!novalidate && hasLengthEqual && dirty && equalWith && !valid"></icon>
-
+      <icon class="vux-input-icon" type="warn" :title="!valid ? firstError : ''" v-show="showWarn"></icon>
+      <icon class="vux-input-icon" type="warn" v-if="!novalidate && hasLengthEqual && dirty && equalWith && !valid"></icon>
       <icon type="success" v-show="!novalidate && equalWith && equalWith === currentValue && valid"></icon>
 
       <icon type="success" class="vux-input-icon" v-show="novalidate && iconType === 'success'"></icon>
@@ -129,27 +123,18 @@
 
       <slot name="right"></slot>
     </div>
-
-    <toast
-    v-model="showErrorToast"
-    type="text"
-    width="auto"
-    :time="600">{{ firstError }}</toast>
   </div>
 </template>
 
 <script>
 import Base from '../../libs/base'
 import Icon from '../icon'
-import Toast from '../toast'
 import InlineDesc from '../inline-desc'
 
 import isEmail from 'validator/lib/isEmail'
 import isMobilePhone from 'validator/lib/isMobilePhone'
 
 import Debounce from '../../tools/debounce'
-
-import mask from 'vanilla-masker'
 
 const validators = {
   'email': {
@@ -172,15 +157,11 @@ const validators = {
 export default {
   name: 'x-input',
   created () {
-    this.currentValue = (this.value === undefined || this.value === null) ? '' : (this.mask ? this.maskValue(this.value) : this.value)
-    /* istanbul ignore if */
-    if (process.env.NODE_ENV === 'development') {
-      if (!this.title && !this.placeholder && !this.currentValue) {
-        console.warn('no title and no placeholder?')
-      }
+    this.currentValue = (this.value === undefined || this.value === null) ? '' : this.value
+    if (!this.title && !this.placeholder && !this.currentValue) {
+      console.warn('no title and no placeholder?')
     }
-
-    if (this.required && typeof this.currentValue === 'undefined') {
+    if (this.required && !this.currentValue) {
       this.valid = false
     }
     this.handleChangeEvent = true
@@ -190,7 +171,7 @@ export default {
       }, this.debounce)
     }
   },
-  beforeMount () {
+  mounted () {
     if (this.$slots && this.$slots['restricted-label']) {
       this.hasRestrictedLabel = true
     }
@@ -203,8 +184,7 @@ export default {
   mixins: [Base],
   components: {
     Icon,
-    InlineDesc,
-    Toast
+    InlineDesc
   },
   props: {
     title: {
@@ -255,12 +235,7 @@ export default {
     iconType: String,
     debounce: Number,
     placeholderAlign: String,
-    labelWidth: String,
-    mask: String,
-    shouldToastError: {
-      type: Boolean,
-      default: true
-    }
+    labelWidth: String
   },
   computed: {
     labelStyles () {
@@ -301,16 +276,6 @@ export default {
     }
   },
   methods: {
-    onClickErrorIcon () {
-      if (this.shouldToastError && this.firstError) {
-        this.showErrorToast = true
-      }
-      this.$emit('on-click-error-icon', this.firstError)
-    },
-    maskValue (val) {
-      const val1 = this.mask ? mask.toPattern(val, this.mask) : val
-      return val1
-    },
     reset (value = '') {
       this.dirty = false
       this.currentValue = value
@@ -367,13 +332,7 @@ export default {
       if (typeof this.isType === 'string') {
         const validator = validators[this.isType]
         if (validator) {
-          let value = this.currentValue
-
-          if (this.isType === 'china-mobile' && this.mask === '999 9999 9999') {
-            value = this.currentValue.replace(/\s+/g, '')
-          }
-
-          this.valid = validator[ 'fn' ](value)
+          this.valid = validator[ 'fn' ](this.currentValue)
           if (!this.valid) {
             this.forceShowError = true
             this.errors.format = validator[ 'msg' ] + '格式不对哦~'
@@ -391,7 +350,9 @@ export default {
         if (!this.valid) {
           this.errors.format = validStatus.msg
           this.forceShowError = true
-          this.getError()
+          if (!this.firstError) {
+            this.getError()
+          }
           return
         } else {
           delete this.errors.format
@@ -402,7 +363,9 @@ export default {
         if (this.currentValue.length < this.min) {
           this.errors.min = `最少应该输入${this.min}个字符哦`
           this.valid = false
-          this.getError()
+          if (!this.firstError) {
+            this.getError()
+          }
           return
         } else {
           delete this.errors.min
@@ -452,17 +415,11 @@ export default {
       forceShowError: false,
       hasLengthEqual: false,
       valid: true,
-      currentValue: '',
-      showErrorToast: false
+      currentValue: ''
     }
     return data
   },
   watch: {
-    mask (val) {
-      if (val && this.currentValue) {
-        this.currentValue = this.maskValue(this.currentValue)
-      }
-    },
     valid () {
       this.getError()
     },
@@ -491,7 +448,7 @@ export default {
       } else {
         this.validate()
       }
-      this.$emit('input', this.maskValue(newVal))
+      this.$emit('input', newVal)
       if (this._debounce) {
         this._debounce()
       } else {
@@ -507,7 +464,6 @@ export default {
 @import '../../styles/weui/widget/weui_cell/weui_cell_global';
 @import '../../styles/weui/widget/weui_cell/weui_form/weui_form_common';
 @import '../../styles/weui/widget/weui_cell/weui_form/weui_vcode';
-
 .vux-x-input .vux-x-input-placeholder-right input::-webkit-input-placeholder {
   text-align: right;
 }
@@ -527,8 +483,5 @@ export default {
   padding-top: 0;
   padding-right: 0;
   padding-bottom: 0;
-}
-.vux-x-input.disabled {
-  color: rgba(0, 0, 0, 0.3);
 }
 </style>

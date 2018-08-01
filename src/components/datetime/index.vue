@@ -1,27 +1,19 @@
 <template>
   <a
   class="vux-datetime weui-cell"
-  :class="{'weui-cell_access': !readonly}"
+  :class="{'weui-cell_access': !readonly, 'vux-tap-active':currentValue}"
   :data-cancel-text="$t('cancel_text')"
   :data-confirm-text="$t('confirm_text')"
   href="javascript:">
     <slot>
       <div>
         <slot name="title">
-          <p
-          :style="{
-            width: $parent.labelWidth,
-            textAlign: $parent.labelAlign,
-            marginRight: $parent.labelMarginRight
-          }"
-          :class="labelClass"
-          v-html="title"></p>
+          <p :style="{width: $parent.labelWidth, textAlign: $parent.labelAlign, marginRight: $parent.labelMarginRight}" :class="labelClass" v-html="title"></p>
         </slot>
-        <inline-desc v-if="inlineDesc">{{ inlineDesc }}</inline-desc>
+        <inline-desc v-if="inlineDesc">{{inlineDesc}}</inline-desc>
       </div>
       <div class="weui-cell__ft vux-cell-primary vux-datetime-value" :style="{textAlign: valueTextAlign}">
-        <span class="vux-cell-placeholder" v-if="!currentValue && placeholder">{{ placeholder }}</span>
-        <span class="vux-cell-value" v-if="currentValue">{{ displayFormat ? displayFormat(currentValue) : currentValue }}</span>
+        {{ _value }}
         <icon class="vux-input-icon" type="warn" v-show="!valid" :title="firstError"></icon>
       </div>
     </slot>
@@ -102,26 +94,8 @@ export default {
       type: Number,
       default: 23
     },
-    startDate: {
-      type: String,
-      validator (val) {
-        /* istanbul ignore if */
-        if (process.env.NODE_ENV === 'development' && val && val.length !== 10) {
-          console.error('[VUX] Datetime prop:start-date 必须为 YYYY-MM-DD 格式')
-        }
-        return val ? val.length === 10 : true
-      }
-    },
-    endDate: {
-      type: String,
-      validator (val) {
-        /* istanbul ignore if */
-        if (process.env.NODE_ENV === 'development' && val && val.length !== 10) {
-          console.error('[VUX] Datetime prop:end-date 必须为 YYYY-MM-DD 格式')
-        }
-        return val ? val.length === 10 : true
-      }
-    },
+    startDate: String,
+    endDate: String,
     valueTextAlign: String,
     displayFormat: Function,
     readonly: Boolean,
@@ -129,8 +103,7 @@ export default {
     minuteList: Array,
     show: Boolean,
     defaultSelectedValue: String,
-    computeHoursFunction: Function,
-    computeDaysFunction: Function
+    computeHoursFunction: Function
   },
   created () {
     this.isFirstSetValue = false
@@ -138,7 +111,6 @@ export default {
   },
   data () {
     return {
-      currentShow: false,
       currentValue: null,
       valid: true,
       errors: {}
@@ -150,16 +122,17 @@ export default {
     if (!this.readonly) {
       this.$nextTick(() => {
         this.render()
-
-        if (this.show) {
-          this.$nextTick(() => {
-            this.picker && this.picker.show(this.currentValue)
-          })
-        }
       })
     }
   },
   computed: {
+    _value () {
+      if (!this.currentValue) {
+        return this.placeholder || ''
+      } else {
+        return this.displayFormat ? this.displayFormat(this.currentValue) : this.currentValue
+      }
+    },
     pickerOptions () {
       const _this = this
       const options = {
@@ -183,7 +156,6 @@ export default {
         minuteList: this.minuteList,
         defaultSelectedValue: this.defaultSelectedValue,
         computeHoursFunction: this.computeHoursFunction,
-        computeDaysFunction: this.computeDaysFunction,
         onSelect (type, val, wholeValue) {
           if (_this.picker && _this.picker.config.renderInline) {
             _this.$emit('input', wholeValue)
@@ -196,20 +168,12 @@ export default {
         onClear (value) {
           _this.$emit('on-clear', value)
         },
-        onHide (type) {
-          _this.currentShow = false
+        onHide () {
           _this.$emit('update:show', false)
           _this.validate()
-          _this.$emit('on-hide', type)
-          if (type === 'cancel') {
-            _this.$emit('on-cancel')
-          }
-          if (type === 'confirm') {
-            _this.$emit('on-confirm')
-          }
+          _this.$emit('on-hide')
         },
         onShow () {
-          _this.currentShow = true
           _this.$emit('update:show', true)
           _this.$emit('on-show')
         }
@@ -266,11 +230,8 @@ export default {
       }
     },
     show (val) {
-      if (val === this.currentShow) return
       if (val) {
         this.picker && this.picker.show(this.currentValue)
-      } else {
-        this.picker && this.picker.hide(this.currentValue)
       }
     },
     currentValue (val, oldVal) {
@@ -297,7 +258,7 @@ export default {
     },
     value (val) {
       // do not force render when renderInline is true
-      if (this.readonly || (this.picker && this.picker.config.renderInline)) {
+      if (this.picker && this.picker.config.renderInline) {
         this.currentValue = val
         return
       }

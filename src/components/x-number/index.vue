@@ -1,10 +1,10 @@
 <template>
   <div class="weui-cell">
     <div>
-      <p v-html="$t(title)" :style="{width: $parent.labelWidth, textAlign: $parent.labelAlign, marginRight: $parent.labelMarginRight}" :class="labelClass"></p>
+      <p v-html="$t(title)" :style="{width: $parent.labelWidth, textAlign: $parent.labelAlign, marginRight: $parent.labelMarginRight}" :class="labelClass + ' vux-label'"></p>
     </div>
     <div class="weui-cell__ft vux-cell-primary" :class="{'vux-number-round': buttonStyle === 'round'}" v-show="!readonly" style="font-size:0">
-      <div :style="{float:align}">
+      <div :style="{float:align,lineHeight:'28px'}">
         <a @click="sub" class="vux-number-selector vux-number-selector-sub":class="{'vux-number-disabled':disabledMin}">
           <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="18" height="18"><defs></defs><path d="M863.74455 544.00086 163.424056 544.00086c-17.664722 0-32.00086-14.336138-32.00086-32.00086s14.336138-32.00086 32.00086-32.00086l700.320495 0c17.695686 0 31.99914 14.336138 31.99914 32.00086S881.440237 544.00086 863.74455 544.00086z"></path></svg>
         </a>
@@ -12,6 +12,7 @@
         <a @click="add" class="vux-number-selector vux-number-selector-plus" :class="{'vux-number-disabled':disabledMax}">
           <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20"><defs></defs><path d="M863.328262 481.340895l-317.344013 0.099772L545.984249 162.816826c0-17.664722-14.336138-32.00086-32.00086-32.00086s-31.99914 14.336138-31.99914 32.00086l0 318.400215-322.368714-0.17718c-0.032684 0-0.063647 0-0.096331 0-17.632039 0-31.935493 14.239806-32.00086 31.904529-0.096331 17.664722 14.208843 32.031824 31.871845 32.095471l322.59234 0.17718 0 319.167424c0 17.695686 14.336138 32.00086 31.99914 32.00086s32.00086-14.303454 32.00086-32.00086L545.982529 545.440667l317.087703-0.099772c0.063647 0 0.096331 0 0.127295 0 17.632039 0 31.935493-14.239806 32.00086-31.904529S880.960301 481.404542 863.328262 481.340895z"></path></svg>
         </a>
+        <slot></slot>
       </div>
     </div>
     <div class="weui-cell__ft vux-cell-primary" v-show="readonly">
@@ -85,16 +86,24 @@ export default {
   },
   watch: {
     currentValue (newValue, old) {
-      if (newValue !== '') {
-        if (typeof this.min !== 'undefined' && this.currentValue < this.min) {
-          this.currentValue = this.min
-        }
-        if (this.max && this.currentValue > this.max) {
-          this.currentValue = this.max
-        }
-      }
-      this.$emit('input', this.currentValue)
-      this.$emit('on-change', this.currentValue)
+      // this.timeId && clearTimeout(this.timeId)
+      // this.timeId = setTimeout(()=>{
+      // this.$nextTick(()=>{
+        // if (newValue !== '') {
+        //   if (typeof this.min !== 'undefined' && this.currentValue < this.min) {
+        //     this.currentValue = this.min
+        //   }
+        //   if (this.max && this.currentValue > this.max) {
+        //     this.currentValue = this.max
+        //   }
+        // }
+        // else{
+        //   this.currentValue = this.min
+        // }
+        this.$emit('input', this.currentValue)
+        this.$emit('on-change', this.currentValue)
+      // },1000)
+      // })
     },
     value (newValue) {
       this.currentValue = newValue
@@ -117,6 +126,12 @@ export default {
       if (this.currentValue === '') {
         this.currentValue = 0
       }
+      if (typeof this.min !== 'undefined' && this.currentValue < this.min) {
+        this.currentValue = this.min
+      }
+      if (this.max && this.currentValue > this.max) {
+        this.currentValue = this.max
+      }
     }
   }
 }
@@ -131,7 +146,7 @@ export default {
 .vux-number-input {
   float:left;
   height:20px;
-  font-size:20px;
+  font-size: 16px;
   color: @number-input-font-color;
   appearance: none;
   border:1px solid #ececec;
@@ -145,8 +160,8 @@ export default {
 .vux-number-selector {
   float:left;
   height:20px;
-  font-size:25px;
-  line-height:18px;
+  font-size: 24px;
+  line-height: 18px;
   color:@number-button-font-color;
   border:1px solid @number-square-button-enabled-border-color;
 }
@@ -155,13 +170,13 @@ export default {
   border-radius: 13px;
 }
 .vux-number-selector svg {
-  fill: @number-button-font-color;
+  fill: #666;
 }
 .vux-number-selector.vux-number-disabled svg {
   fill: #ccc;
 }
 .vux-number-round .vux-number-selector.vux-number-disabled {
-  border-color: @number-round-button-disabled-border-color;
+  border-color: #ccc;
 }
 .vux-number-round .vux-number-selector.vux-number-disabled svg {
   fill: #ccc;

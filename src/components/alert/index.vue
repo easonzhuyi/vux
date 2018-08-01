@@ -5,7 +5,6 @@
     :mask-transition="maskTransition"
     :dialog-transition="dialogTransition"
     :hide-on-blur="hideOnBlur"
-    :mask-z-index="maskZIndex"
     @on-hide="$emit('on-hide')"
     @on-show="$emit('on-show')">
       <div class="weui-dialog__hd">
@@ -60,8 +59,7 @@ export default {
     dialogTransition: {
       type: String,
       default: 'vux-dialog'
-    },
-    maskZIndex: [Number, String]
+    }
   },
   data () {
     return {

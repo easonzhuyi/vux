@@ -34,8 +34,7 @@ export default {
       type: Boolean,
       default: true
     },
-    customBarWidth: [Function, String],
-    preventDefault: Boolean
+    customBarWidth: [Function, String]
   },
   computed: {
     barLeft () {

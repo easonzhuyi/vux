@@ -307,9 +307,6 @@ export default {
     })
     this.getStyles()
   },
-  updated () {
-    this.reset()
-  },
   beforeDestroy () {
     if (this.pullup) {
       this._xscroll.unplug(this.pullup)

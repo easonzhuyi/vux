@@ -13,7 +13,6 @@ import Scroller from './scroller'
 import { Flexbox, FlexboxItem } from '../flexbox'
 import Manager from './chain'
 import value2name from '../../filters/value2name'
-import isArray from '../../libs/is-array'
 
 export default {
   name: 'picker',
@@ -35,7 +34,7 @@ export default {
     })
   },
   props: {
-    data: Array,
+    data: [Array],
     columns: {
       type: Number,
       default: 0
@@ -68,14 +67,6 @@ export default {
       // set first item as value
       if (value.length < count) {
         for (let i = 0; i < count; i++) {
-          if (process.env.NODE_ENV === 'development' &&
-            typeof data[i][0] === 'undefined' &&
-            isArray(this.data) &&
-            this.data[0] &&
-            typeof this.data[0].value !== 'undefined' &&
-            !this.columns) {
-            console.error('[VUX error] 渲染出错，如果为联动模式，需要指定 columns(列数)')
-          }
           this.$set(_this.currentValue, i, data[i][0].value || data[i][0])
         }
       }
@@ -92,7 +83,7 @@ export default {
         _this.scroller[i] = new Scroller(_this.getId(i), {
           data: data[i],
           defaultValue: value[i] || data[i][0].value,
-          itemClass: _this.itemClass,
+          itemClass: _this.item_class,
           onSelect (value) {
             _this.$set(_this.currentValue, i, value)
             if (!this.columns || (this.columns && _this.getValue().length === _this.store.count)) {
@@ -136,13 +127,8 @@ export default {
           _this.renderChain(i + 1)
         }
       })
-      // list is Array(empty) as maybe
-      if (list.length) {
-        this.$set(this.currentValue, i, list[0].value)
-        this.renderChain(i + 1)
-      } else {
-        this.$set(this.currentValue, i, null)
-      }
+      this.$set(this.currentValue, i, list[0].value)
+      this.renderChain(i + 1)
     },
     getValue () {
       let data = []

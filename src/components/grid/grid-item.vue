@@ -18,24 +18,18 @@ import { go } from '../../libs/router'
 export default {
   name: 'grid-item',
   props: ['icon', 'label', 'link'],
-  created () {
-    this.$parent.countColumn()
-  },
   mounted () {
     this.$slots.icon && (this.hasIconSlot = true)
     this.$slots.label && (this.hasLabelSlot = true)
   },
-  destroyed () {
-    this.$parent.countColumn()
-  },
   computed: {
     style () {
-      const column = this.$parent.column
-      if (!column || column === 3) {
+      const rows = this.$parent.rows
+      if (!rows || rows === 3) {
         return
       }
       const styles = {}
-      styles.width = `${100 / column}%`
+      styles.width = `${100 / rows}%`
       return styles
     }
   },

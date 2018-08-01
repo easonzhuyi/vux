@@ -70,26 +70,6 @@ slots:
     en: content body
     zh-CN: 弹窗主体内容
 changes:
-  v2.5.12:
-    en:
-      - '[fix] clean vux-modal-open on beforeDestroy and deactivated #1921'
-    zh-CN:
-      - '[fix] 在 beforeDestroy 和 deactivated 事件中清除设置于 body 上的 vux-modal-open 类名 #1921'
-  v2.5.11:
-    en:
-      - '[fix] add vux-modal-open only when global config:$layout is VIEW_BOX #1893'
-    zh-CN:
-      - '[fix] 仅在全局配置 $layout = VIEW_BOX 时用 fixed body 的形式阻止页面滚动 #1893'
-  v2.5.10:
-    en:
-      - '[fix] Fix class helper typo issue #1893'
-    zh-CN:
-      - '[fix] 修复 class 工具函数拼写错误 #1893'
-  v2.5.9:
-    en:
-      - '[fix] Fix layout errors when body not set 100% width #1867'
-    zh-CN:
-      - '[feature] 修复当body没有设置100%宽度时出现的布局错乱问题 #1867'
   v2.5.5:
     en:
       - '[feature] Auto hide popup on deactived #1774'
